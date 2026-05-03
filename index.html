@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwanda Homes — Find Your Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #F7F4EF;
+            --fg: #1A1A1A;
+            --muted: #7A7468;
+            --accent: #D4872C;
+            --accent-light: #F5DEB3;
+            --primary: #1B4332;
+            --primary-light: #2D6A4F;
+            --card: #FFFFFF;
+            --border: #E5E0D8;
+            --danger: #C0392B;
+            --success: #27AE60;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+
+        .hero-pattern {
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(27,67,50,0.15), transparent),
+                radial-gradient(ellipse 60% 60% at 80% 20%, rgba(212,135,44,0.1), transparent),
+                radial-gradient(ellipse 40% 40% at 50% 80%, rgba(27,67,50,0.08), transparent);
+        }
+
+        .float-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.06;
+            animation: floatAnim 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .float-shape:nth-child(2) { animation-delay: -7s; animation-duration: 25s; }
+        .float-shape:nth-child(3) { animation-delay: -14s; animation-duration: 18s; }
+
+        @keyframes floatAnim {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        .house-card {
+            transition: transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s ease;
+        }
+        .house-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 60px rgba(27,67,50,0.12), 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .house-card .card-img {
+            transition: transform 0.6s cubic-bezier(.25,.8,.25,1);
+        }
+        .house-card:hover .card-img {
+            transform: scale(1.07);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--primary-light);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        .btn-primary:hover::before { transform: scaleX(1); }
+        .btn-primary span { position: relative; z-index: 1; }
+
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .btn-accent:hover {
+            background: #B8741F;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(212,135,44,0.3);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+        .badge-sell { background: #E8F5E9; color: #2E7D32; }
+        .badge-rent { background: #FFF3E0; color: #E65100; }
+        .badge-buy { background: #E3F2FD; color: #1565C0; }
+
+        .modal-overlay {
+            backdrop-filter: blur(6px);
+            background: rgba(26,26,26,0.5);
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            animation: modalIn 0.35s cubic-bezier(.25,.8,.25,1);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .form-input {
+            border: 2px solid var(--border);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background: var(--card);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(27,67,50,0.1);
+        }
+
+        .toast {
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.6s forwards;
+        }
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s cubic-bezier(.25,.8,.25,1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-scrolled {
+            background: rgba(247,244,239,0.92) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 1px 20px rgba(0,0,0,0.06);
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(27,67,50,0.03);
+        }
+        .upload-zone.has-image {
+            border-style: solid;
+            border-color: var(--success);
+        }
+
+        .filter-chip {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .filter-chip.active {
+            background: var(--primary) !important;
+            color: #fff !important;
+            border-color: var(--primary) !important;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+        @keyframes bounce-gentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .bounce-gentle { animation: bounce-gentle 2s ease-in-out infinite; }
+
+        .mobile-menu {
+            transition: transform 0.3s cubic-bezier(.25,.8,.25,1), opacity 0.3s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
+
+<!-- Navigation -->
+<nav id="mainNav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 sm:h-20">
+            <a href="#" class="flex items-center gap-2" onclick="scrollToTop()">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--primary)">
+                    <i class="fas fa-home text-white text-sm"></i>
+                </div>
+                <span class="text-xl font-bold" style="font-family:'Playfair Display',serif; color:var(--primary)">Rwanda Homes</span>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#listings" class="text-sm font-medium hover:text-[--primary] transition-colors" style="color:var(--muted)">Browse Homes</a>
+                <a href="#how-it-works" class="text-sm font-medium hover:text-[--primary] transition-colors" style="color:var(--muted)">How It Works</a>
+                <button onclick="openPostModal()" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-semibold">
+                    <span><i class="fas fa-plus mr-1.5"></i>Post Listing</span>
+                </button>
+            </div>
+
+            <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-lg flex items-center justify-center" style="color:var(--fg)" aria-label="Toggle menu">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="mobileMenu" class="mobile-menu md:hidden fixed inset-0 top-16 bg-white/95 backdrop-blur-lg opacity-0 pointer-events-none" style="transform:translateY(-10px)">
+        <div class="flex flex-col p-6 gap-4">
+            <a href="#listings" onclick="closeMobileMenu()" class="text-lg font-medium py-3 border-b" style="color:var(--fg); border-color:var(--border)">Browse Homes</a>
+            <a href="#how-it-works" onclick="closeMobileMenu()" class="text-lg font-medium py-3 border-b" style="color:var(--fg); border-color:var(--border)">How It Works</a>
+            <button onclick="closeMobileMenu(); openPostModal()" class="btn-primary px-5 py-3 rounded-lg text-base font-semibold mt-2">
+                <span><i class="fas fa-plus mr-2"></i>Post Listing</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<header class="relative min-h-[92vh] flex items-center hero-pattern overflow-hidden pt-20">
+    <div class="float-shape w-96 h-96 bg-[--primary] top-10 -left-48"></div>
+    <div class="float-shape w-72 h-72 bg-[--accent] top-40 right-10"></div>
+    <div class="float-shape w-56 h-56 bg-[--primary] bottom-10 left-1/3"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6" style="background:rgba(27,67,50,0.08); color:var(--primary)">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[--success] animate-pulse"></span>
+                    Trusted by thousands in Rwanda
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] mb-6" style="color:var(--fg)">
+                    Find Your <br>
+                    <span style="color:var(--primary)">Perfect</span> Home<br>
+                    Today
+                </h1>
+                <p class="text-base sm:text-lg leading-relaxed mb-8 max-w-lg" style="color:var(--muted)">
+                    Whether you're selling, renting, or buying — Rwanda Homes connects you directly with people. No middlemen, no hidden fees. Just real homes from real people.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})" class="btn-primary px-7 py-3.5 rounded-xl text-sm font-bold">
+                        <span>Browse Listings <i class="fas fa-arrow-down ml-2"></i></span>
+                    </button>
+                    <button onclick="openPostModal()" class="px-7 py-3.5 rounded-xl text-sm font-bold border-2 hover:bg-[--primary] hover:text-white transition-all" style="border-color:var(--primary); color:var(--primary)">
+                        Post Your Home
+                    </button>
+                </div>
+
+                <div class="flex gap-8 mt-10 pt-8 border-t" style="border-color:var(--border)">
+                    <div>
+                        <div class="text-2xl font-black" style="color:var(--primary)" id="statListings">0</div>
+                        <div class="text-xs font-medium mt-0.5" style="color:var(--muted)">Active Listings</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black" style="color:var(--accent)">3</div>
+                        <div class="text-xs font-medium mt-0.5" style="color:var(--muted)">Listing Types</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-black" style="color:var(--primary)">Free</div>
+                        <div class="text-xs font-medium mt-0.5" style="color:var(--muted)">Always</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden lg:block relative">
+                <div class="relative w-full aspect-square">
+                    <div class="absolute top-0 right-0 w-72 h-80 rounded-2xl overflow-hidden shadow-2xl" style="transform: rotate(3deg)">
+                        <img src="https://picsum.photos/seed/house1/600/700.jpg" alt="House" class="w-full h-full object-cover">
+                        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(27,67,50,0.4), transparent)"></div>
+                        <div class="absolute bottom-4 left-4 text-white">
+                            <div class="badge badge-sell inline-block mb-1">For Sale</div>
+                            <div class="text-sm font-bold">From 15,000,000 RWF</div>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-4 left-0 w-60 h-64 rounded-2xl overflow-hidden shadow-2xl" style="transform: rotate(-4deg)">
+                        <img src="https://picsum.photos/seed/house2/500/550.jpg" alt="House" class="w-full h-full object-cover">
+                        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(212,135,44,0.4), transparent)"></div>
+                        <div class="absolute bottom-4 left-4 text-white">
+                            <div class="badge badge-rent inline-block mb-1">For Rent</div>
+                            <div class="text-sm font-bold">From 150,000 RWF/mo</div>
+                        </div>
+                    </div>
+                    <div class="absolute top-1/2 left-1/3 w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl z-10" style="background:var(--accent); transform:translate(-50%,-50%)">
+                        <i class="fas fa-heart text-white text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- How It Works -->
+<section id="how-it-works" class="py-20 sm:py-28 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16 reveal">
+            <div class="text-xs font-bold tracking-widest uppercase mb-3" style="color:var(--accent)">Simple Process</div>
+            <h2 class="text-3xl sm:text-4xl font-black mb-4" style="color:var(--fg)">How It Works</h2>
+            <p class="text-base max-w-xl mx-auto" style="color:var(--muted)">Three simple steps to list or find your next home. No complicated forms, no waiting.</p>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-6 lg:gap-8">
+            <div class="reveal text-center p-8 rounded-2xl border" style="background:var(--card); border-color:var(--border); transition-delay:0.1s">
+                <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center" style="background:rgba(27,67,50,0.08)">
+                    <i class="fas fa-camera text-xl" style="color:var(--primary)"></i>
+                </div>
+                <div class="text-xs font-bold tracking-wider mb-2" style="color:var(--accent)">STEP 01</div>
+                <h3 class="text-lg font-bold mb-2">Post Your Listing</h3>
+                <p class="text-sm leading-relaxed" style="color:var(--muted)">Upload a photo, set your price, choose sell/rent/buy, and add your contact info.</p>
+            </div>
+            <div class="reveal text-center p-8 rounded-2xl border" style="background:var(--card); border-color:var(--border); transition-delay:0.2s">
+                <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center" style="background:rgba(212,135,44,0.1)">
+                    <i class="fas fa-search text-xl" style="color:var(--accent)"></i>
+                </div>
+                <div class="text-xs font-bold tracking-wider mb-2" style="color:var(--accent)">STEP 02</div>
+                <h3 class="text-lg font-bold mb-2">Browse & Filter</h3>
+                <p class="text-sm leading-relaxed" style="color:var(--muted)">Search by type, location, or price range to find exactly what you're looking for.</p>
+            </div>
+            <div class="reveal text-center p-8 rounded-2xl border" style="background:var(--card); border-color:var(--border); transition-delay:0.3s">
+                <div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center" style="background:rgba(27,67,50,0.08)">
+                    <i class="fas fa-envelope text-xl" style="color:var(--primary)"></i>
+                </div>
+                <div class="text-xs font-bold tracking-wider mb-2" style="color:var(--accent)">STEP 03</div>
+                <h3 class="text-lg font-bold mb-2">Send a Message</h3>
+                <p class="text-sm leading-relaxed" style="color:var(--muted)">Found a home you like? Send a message directly and the owner gets notified by email.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Listings Section -->
+<section id="listings" class="py-20 sm:py-28 relative" style="background: linear-gradient(180deg, var(--bg), rgba(27,67,50,0.03), var(--bg))">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 reveal">
+            <div>
+                <div class="text-xs font-bold tracking-widest uppercase mb-3" style="color:var(--accent)">Available Now</div>
+                <h2 class="text-3xl sm:text-4xl font-black" style="color:var(--fg)">Browse Homes</h2>
+            </div>
+            <button onclick="openPostModal()" class="btn-accent px-5 py-2.5 rounded-lg text-sm font-bold self-start sm:self-auto">
+                <i class="fas fa-plus mr-1.5"></i>Add Your Listing
+            </button>
+        </div>
+
+        <div class="reveal mb-8 p-4 sm:p-5 rounded-2xl border" style="background:var(--card); border-color:var(--border)">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <div class="flex-1 relative">
+                    <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color:var(--muted)"></i>
+                    <input type="text" id="searchInput" placeholder="Search by location or district..." class="form-input w-full pl-10 pr-4 py-2.5 rounded-lg text-sm" oninput="filterListings()">
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <button class="filter-chip active px-4 py-2 rounded-lg text-xs font-bold border-2" style="border-color:var(--border); color:var(--muted)" data-type="all" onclick="setTypeFilter('all', this)">All</button>
+                    <button class="filter-chip px-4 py-2 rounded-lg text-xs font-bold border-2" style="border-color:var(--border); color:var(--muted)" data-type="sell" onclick="setTypeFilter('sell', this)">
+                        <i class="fas fa-tag mr-1"></i>For Sale
+                    </button>
+                    <button class="filter-chip px-4 py-2 rounded-lg text-xs font-bold border-2" style="border-color:var(--border); color:var(--muted)" data-type="rent" onclick="setTypeFilter('rent', this)">
+                        <i class="fas fa-key mr-1"></i>For Rent
+                    </button>
+                    <button class="filter-chip px-4 py-2 rounded-lg text-xs font-bold border-2" style="border-color:var(--border); color:var(--muted)" data-type="buy" onclick="setTypeFilter('buy', this)">
+                        <i class="fas fa-hand-holding-usd mr-1"></i>Want to Buy
+                    </button>
+                </div>
+                <select id="sortSelect" class="form-input px-3 py-2.5 rounded-lg text-sm cursor-pointer" onchange="filterListings()">
+                    <option value="newest">Newest First</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="listingsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div id="emptyState" class="hidden text-center py-20">
+            <div class="bounce-gentle inline-block mb-6">
+                <div class="w-24 h-24 rounded-full flex items-center justify-center mx-auto" style="background:rgba(27,67,50,0.06)">
+                    <i class="fas fa-home text-3xl" style="color:var(--border)"></i>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold mb-2" style="color:var(--fg)">No listings yet</h3>
+            <p class="text-sm mb-6" style="color:var(--muted)">Be the first to post a home listing on Rwanda Homes.</p>
+            <button onclick="openPostModal()" class="btn-primary px-6 py-3 rounded-xl text-sm font-bold">
+                <span><i class="fas fa-plus mr-2"></i>Post Your Home</span>
+            </button>
+        </div>
+
+        <div id="noResultsState" class="hidden text-center py-20">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5" style="background:rgba(212,135,44,0.1)">
+                <i class="fas fa-search text-2xl" style="color:var(--accent)"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2" style="color:var(--fg)">No matches found</h3>
+            <p class="text-sm" style="color:var(--muted)">Try adjusting your filters or search terms.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 border-t" style="border-color:var(--border); background:var(--card)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--primary)">
+                    <i class="fas fa-home text-white text-xs"></i>
+                </div>
+                <span class="text-lg font-bold" style="font-family:'Playfair Display',serif; color:var(--primary)">Rwanda Homes</span>
+            </div>
+            <p class="text-sm" style="color:var(--muted)">Connecting people with homes across Rwanda. Free, simple, direct.</p>
+            <div class="flex gap-4">
+                <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-colors hover:bg-[--primary] hover:text-white hover:border-[--primary]" style="border-color:var(--border); color:var(--muted)" aria-label="Facebook">
+                    <i class="fab fa-facebook-f text-sm"></i>
+                </a>
+                <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-colors hover:bg-[--primary] hover:text-white hover:border-[--primary]" style="border-color:var(--border); color:var(--muted)" aria-label="Twitter">
+                    <i class="fab fa-twitter text-sm"></i>
+                </a>
+                <a href="#" class="w-9 h-9 rounded-lg flex items-center justify-center border transition-colors hover:bg-[--primary] hover:text-white hover:border-[--primary]" style="border-color:var(--border); color:var(--muted)" aria-label="WhatsApp">
+                    <i class="fab fa-whatsapp text-sm"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Post Listing Modal -->
+<div id="postModal" class="modal-overlay fixed inset-0 z-[100] hidden items-center justify-center p-4" style="display:none">
+    <div class="modal-content w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6 sm:p-8" style="background:var(--card)">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-black" style="color:var(--fg)">Post a Listing</h2>
+            <button onclick="closePostModal()" class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-gray-100" aria-label="Close">
+                <i class="fas fa-times" style="color:var(--muted)"></i>
+            </button>
+        </div>
+
+        <form id="postForm" onsubmit="handlePostSubmit(event)" novalidate>
+            <div class="mb-5">
+                <label class="block text-sm font-semibold mb-2" style="color:var(--fg)">House Photo <span style="color:var(--danger)">*</span></label>
+                <div id="uploadZone" class="upload-zone rounded-xl p-6 text-center" onclick="document.getElementById('photoInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    <div id="uploadPlaceholder">
+                        <i class="fas fa-cloud-upload-alt text-2xl mb-2" style="color:var(--border)"></i>
+                        <p class="text-sm font-medium" style="color:var(--muted)">Click or drag a photo here</p>
+                        <p class="text-xs mt-1" style="color:var(--border)">JPG, PNG — Max 5MB</p>
+                    </div>
+                    <div id="uploadPreview" class="hidden">
+                        <img id="previewImg" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg">
+                        <p class="text-xs mt-2 font-medium" style="color:var(--success)"><i class="fas fa-check-circle mr-1"></i>Photo uploaded</p>
+                    </div>
+                </div>
+                <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" class="hidden" onchange="handleFileSelect(event)">
+                <div id="photoError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-semibold mb-2" style="color:var(--fg)">Listing Type <span style="color:var(--danger)">*</span></label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="listingType" value="sell" class="peer sr-only" required>
+                        <div class="p-3 rounded-lg border-2 text-center text-xs font-bold transition-all peer-checked:border-[--primary] peer-checked:bg-[rgba(27,67,50,0.05)] peer-checked:text-[--primary]" style="border-color:var(--border); color:var(--muted)">
+                            <i class="fas fa-tag block text-base mb-1"></i>For Sale
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="listingType" value="rent" class="peer sr-only">
+                        <div class="p-3 rounded-lg border-2 text-center text-xs font-bold transition-all peer-checked:border-[--primary] peer-checked:bg-[rgba(27,67,50,0.05)] peer-checked:text-[--primary]" style="border-color:var(--border); color:var(--muted)">
+                            <i class="fas fa-key block text-base mb-1"></i>For Rent
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="listingType" value="buy" class="peer sr-only">
+                        <div class="p-3 rounded-lg border-2 text-center text-xs font-bold transition-all peer-checked:border-[--primary] peer-checked:bg-[rgba(27,67,50,0.05)] peer-checked:text-[--primary]" style="border-color:var(--border); color:var(--muted)">
+                            <i class="fas fa-hand-holding-usd block text-base mb-1"></i>Want to Buy
+                        </div>
+                    </label>
+                </div>
+                <div id="typeError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+            </div>
+
+            <div class="mb-5">
+                <label for="locationInput" class="block text-sm font-semibold mb-2" style="color:var(--fg)">Location (District / Sector) <span style="color:var(--danger)">*</span></label>
+                <input type="text" id="locationInput" class="form-input w-full px-4 py-2.5 rounded-lg text-sm" placeholder="e.g. Gasabo, Kicukiro, Nyarugenge...">
+                <div id="locationError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+            </div>
+
+            <div class="mb-5">
+                <label for="priceInput" class="block text-sm font-semibold mb-2" style="color:var(--fg)">Price (RWF) <span style="color:var(--danger)">*</span></label>
+                <div class="relative">
+                    <input type="number" id="priceInput" class="form-input w-full pl-4 pr-16 py-2.5 rounded-lg text-sm" placeholder="0" min="0">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold" style="color:var(--muted)">RWF</span>
+                </div>
+                <div id="priceError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+            </div>
+
+            <div class="mb-6">
+                <label for="phoneInput" class="block text-sm font-semibold mb-2" style="color:var(--fg)">Phone Number <span style="color:var(--danger)">*</span></label>
+                <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold" style="color:var(--muted)">+250</span>
+                    <input type="tel" id="phoneInput" class="form-input w-full pl-14 pr-4 py-2.5 rounded-lg text-sm" placeholder="7XX XXX XXX">
+                </div>
+                <div id="phoneError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-primary w-full py-3.5 rounded-xl text-sm font-bold">
+                <span><i class="fas fa-paper-plane mr-2"></i>Publish Listing</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div id="messageModal" class="modal-overlay fixed inset-0 z-[100] hidden items-center justify-center p-4" style="display:none">
+    <div class="modal-content w-full max-w-lg rounded-2xl overflow-hidden" style="background:var(--card)">
+        <div class="relative h-48">
+            <img id="msgHouseImg" src="" alt="House" class="w-full h-full object-cover">
+            <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%)"></div>
+            <div class="absolute bottom-4 left-4 right-4 text-white">
+                <div id="msgHouseBadge" class="badge inline-block mb-1"></div>
+                <div id="msgHouseTitle" class="text-lg font-bold"></div>
+                <div id="msgHousePrice" class="text-sm opacity-90"></div>
+            </div>
+            <button onclick="closeMessageModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white hover:bg-black/50 transition" aria-label="Close">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <h3 class="text-lg font-bold mb-1" style="color:var(--fg)">Send a Message</h3>
+            <p class="text-sm mb-5" style="color:var(--muted)">Write your message below. It will be sent to the listing contact via email.</p>
+
+            <form onsubmit="handleMessageSubmit(event)" novalidate>
+                <div class="mb-4">
+                    <label for="senderName" class="block text-sm font-semibold mb-1.5" style="color:var(--fg)">Your Name <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="senderName" class="form-input w-full px-4 py-2.5 rounded-lg text-sm" placeholder="Enter your full name">
+                    <div id="senderNameError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="senderPhone" class="block text-sm font-semibold mb-1.5" style="color:var(--fg)">Your Phone <span style="color:var(--danger)">*</span></label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold" style="color:var(--muted)">+250</span>
+                        <input type="tel" id="senderPhone" class="form-input w-full pl-14 pr-4 py-2.5 rounded-lg text-sm" placeholder="7XX XXX XXX">
+                    </div>
+                    <div id="senderPhoneError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+                </div>
+
+                <div class="mb-5">
+                    <label for="senderMessage" class="block text-sm font-semibold mb-1.5" style="color:var(--fg)">Your Message <span style="color:var(--danger)">*</span></label>
+                    <textarea id="senderMessage" rows="4" class="form-input w-full px-4 py-2.5 rounded-lg text-sm resize-none" placeholder="I'm interested in this property. I'd like to schedule a visit..."></textarea>
+                    <div id="senderMessageError" class="text-xs mt-1 hidden" style="color:var(--danger)"></div>
+                </div>
+
+                <button type="submit" class="btn-accent w-full py-3.5 rounded-xl text-sm font-bold">
+                    <i class="fas fa-envelope mr-2"></i>Send Message
+                </button>
+
+                <div id="directCallSection" class="mt-4 text-center">
+                    <p class="text-xs mb-2" style="color:var(--muted)">Or call directly:</p>
+                    <a id="directCallLink" href="#" class="inline-flex items-center gap-2 text-sm font-bold transition-colors" style="color:var(--primary)">
+                        <i class="fas fa-phone-alt"></i>
+                        <span id="directCallNumber"></span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteModal" class="modal-overlay fixed inset-0 z-[110] hidden items-center justify-center p-4" style="display:none">
+    <div class="modal-content w-full max-w-sm rounded-2xl p-6 text-center" style="background:var(--card)">
+        <div class="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style="background:rgba(192,57,43,0.1)">
+            <i class="fas fa-trash-alt text-xl" style="color:var(--danger)"></i>
+        </div>
+        <h3 class="text-lg font-bold mb-2" style="color:var(--fg)">Delete Listing?</h3>
+        <p class="text-sm mb-6" style="color:var(--muted)">This action cannot be undone. The listing will be permanently removed.</p>
+        <div class="flex gap-3">
+            <button onclick="closeDeleteModal()" class="flex-1 py-2.5 rounded-lg text-sm font-bold border-2 transition-colors hover:bg-gray-50" style="border-color:var(--border); color:var(--muted)">Cancel</button>
+            <button id="confirmDeleteBtn" onclick="confirmDelete()" class="flex-1 py-2.5 rounded-lg text-sm font-bold text-white transition-colors" style="background:var(--danger)">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'all';
+    let selectedPhotoData = null;
+    let currentMessageHouse = null;
+    let deleteTargetId = null;
+    let mobileMenuOpen = false;
+
+    const EMAIL_TARGET = 'niyogushimwafiacre751@gmail.com';
+    const SITE_NAME = 'Rwanda Homes';
+
+    function getListings() {
+        try {
+            const data = localStorage.getItem('rwanda_homes_listings');
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveListings(listings) {
+        localStorage.setItem('rwanda_homes_listings', JSON.stringify(listings));
+    }
+
+    function addListing(listing) {
+        const listings = getListings();
+        listing.id = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        listing.createdAt = new Date().toISOString();
+        listings.unshift(listing);
+        saveListings(listings);
+        return listing;
+    }
+
+    function deleteListing(id) {
+        const listings = getListings().filter(l => l.id !== id);
+        saveListings(listings);
+    }
+
+    function formatPrice(num) {
+        if (!num) return '0';
+        return new Intl.NumberFormat('en-RW').format(num);
+    }
+
+    function getTypeLabel(type) {
+        const labels = { sell: 'For Sale', rent: 'For Rent', buy: 'Want to Buy' };
+        return labels[type] || type;
+    }
+
+    function getTypeBadgeClass(type) {
+        const classes = { sell: 'badge-sell', rent: 'badge-rent', buy: 'badge-buy' };
+        return classes[type] || '';
+    }
+
+    function getTimeAgo(dateStr) {
+        const now = new Date();
+        const date = new Date(dateStr);
+        const diffMs = now - date;
+        const diffMin = Math.floor(diffMs / 60000);
+        const diffHr = Math.floor(diffMs / 3600000);
+        const diffDay = Math.floor(diffMs / 86400000);
+
+        if (diffMin < 1) return 'Just now';
+        if (diffMin < 60) return diffMin + 'm ago';
+        if (diffHr < 24) return diffHr + 'h ago';
+        if (diffDay < 7) return diffDay + 'd ago';
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    function renderListings(listings) {
+        const grid = document.getElementById('listingsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const noResults = document.getElementById('noResultsState');
+        const allListings = getListings();
+
+        document.getElementById('statListings').textContent = allListings.length;
+
+        if (allListings.length === 0) {
+            grid.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            noResults.classList.add('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+
+        if (listings.length === 0) {
+            grid.innerHTML = '';
+            noResults.classList.remove('hidden');
+            return;
+        }
+
+        noResults.classList.add('hidden');
+
+        grid.innerHTML = listings.map((house, i) => `
+            <article class="house-card rounded-2xl overflow-hidden border reveal" style="background:var(--card); border-color:var(--border); transition-delay:${i * 0.05}s">
+                <div class="relative h-52 overflow-hidden cursor-pointer" onclick="openMessageModal('${house.id}')">
+                    <img src="${house.photo}" alt="House in ${house.location}" class="card-img w-full h-full object-cover" loading="lazy" onerror="this.src='https://picsum.photos/seed/fallback${house.id}/600/400.jpg'">
+                    <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,0.4), transparent 50%)"></div>
+                    <span class="badge ${getTypeBadgeClass(house.type)} absolute top-3 left-3">${getTypeLabel(house.type)}</span>
+                    <div class="absolute top-3 right-3 flex gap-1.5">
+                        <button onclick="event.stopPropagation(); openMessageModal('${house.id}')" class="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-[--primary] hover:bg-white transition shadow-sm" aria-label="Send message" title="Send message">
+                            <i class="fas fa-envelope text-xs"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); openDeleteModal('${house.id}')" class="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-[--danger] hover:bg-white transition shadow-sm" aria-label="Delete listing" title="Delete listing">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="absolute bottom-3 left-3 text-white">
+                        <div class="text-xl font-black">${formatPrice(house.price)} RWF${house.type === 'rent' ? '/mo' : ''}</div>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <div>
+                            <h3 class="text-sm font-bold mb-0.5" style="color:var(--fg)">
+                                <i class="fas fa-map-marker-alt text-xs mr-1" style="color:var(--accent)"></i>${house.location}
+                            </h3>
+                            <p class="text-xs" style="color:var(--muted)">${getTimeAgo(house.createdAt)}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-3 border-t" style="border-color:var(--border)">
+                        <a href="tel:+250${house.phone.replace(/\s/g,'')}" class="flex items-center gap-2 text-xs font-semibold transition-colors hover:text-[--primary]" style="color:var(--muted)" onclick="event.stopPropagation()">
+                            <i class="fas fa-phone-alt"></i>
+                            +250 ${house.phone}
+                        </a>
+                        <button onclick="openMessageModal('${house.id}')" class="text-xs font-bold px-3 py-1.5 rounded-md transition-colors" style="background:rgba(27,67,50,0.08); color:var(--primary)">
+                            Message <i class="fas fa-arrow-right ml-1 text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            </article>
+        `).join('');
+
+        requestAnimationFrame(() => {
+            document.querySelectorAll('#listingsGrid .reveal').forEach(el => {
+                observerInstance.observe(el);
+            });
+        });
+    }
+
+    function filterListings() {
+        let listings = getListings();
+        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const sort = document.getElementById('sortSelect').value;
+
+        if (currentFilter !== 'all') {
+            listings = listings.filter(l => l.type === currentFilter);
+        }
+
+        if (search) {
+            listings = listings.filter(l => l.location.toLowerCase().includes(search));
+        }
+
+        if (sort === 'newest') {
+            listings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        } else if (sort === 'price-low') {
+            listings.sort((a, b) => a.price - b.price);
+        } else if (sort === 'price-high') {
+            listings.sort((a, b) => b.price - a.price);
+        }
+
+        renderListings(listings);
+    }
+
+    function setTypeFilter(type, btn) {
+        currentFilter = type;
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        filterListings();
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) processFile(file);
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        document.getElementById('uploadZone').classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        document.getElementById('uploadZone').classList.remove('dragover');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('uploadZone').classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) processFile(file);
+    }
+
+    function processFile(file) {
+        const errorEl = document.getElementById('photoError');
+        errorEl.classList.add('hidden');
+
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            errorEl.textContent = 'Please upload a JPG, PNG, or WebP image.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            errorEl.textContent = 'Image must be under 5MB.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800;
+                const MAX_HEIGHT = 600;
+                let w = img.width;
+                let h = img.height;
+
+                if (w > MAX_WIDTH) {
+                    h = (MAX_WIDTH / w) * h;
+                    w = MAX_WIDTH;
+                }
+                if (h > MAX_HEIGHT) {
+                    w = (MAX_HEIGHT / h) * w;
+                    h = MAX_HEIGHT;
+                }
+
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                selectedPhotoData = canvas.toDataURL('image/jpeg', 0.75);
+
+                document.getElementById('previewImg').src = selectedPhotoData;
+                document.getElementById('uploadPlaceholder').classList.add('hidden');
+                document.getElementById('uploadPreview').classList.remove('hidden');
+                document.getElementById('uploadZone').classList.add('has-image');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function openPostModal() {
+        const modal = document.getElementById('postModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        resetPostForm();
+    }
+
+    function closePostModal() {
+        const modal = document.getElementById('postModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function resetPostForm() {
+        document.getElementById('postForm').reset();
+        selectedPhotoData = null;
+        document.getElementById('uploadPlaceholder').classList.remove('hidden');
+        document.getElementById('uploadPreview').classList.add('hidden');
+        document.getElementById('uploadZone').classList.remove('has-image');
+        document.querySelectorAll('#postForm [id$="Error"]').forEach(el => el.classList.add('hidden'));
+    }
+
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    function hideError(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    function handlePostSubmit(e) {
+        e.preventDefault();
+        let valid = true;
+
+        if (!selectedPhotoData) {
+            showError('photoError', 'Please upload a photo of the house.');
+            valid = false;
+        } else {
+            hideError('photoError');
+        }
+
+        const type = document.querySelector('input[name="listingType"]:checked');
+        if (!type) {
+            showError('typeError', 'Please select a listing type.');
+            valid = false;
+        } else {
+            hideError('typeError');
+        }
+
+        const location = document.getElementById('locationInput').value.trim();
+        if (!location) {
+            showError('locationError', 'Please enter the location.');
+            valid = false;
+        } else {
+            hideError('locationError');
+        }
+
+        const price = parseInt(document.getElementById('priceInput').value);
+        if (!price || price <= 0) {
+            showError('priceError', 'Please enter a valid price.');
+            valid = false;
+        } else {
+            hideError('priceError');
+        }
+
+        const phone = document.getElementById('phoneInput').value.trim().replace(/\s/g, '');
+        if (!phone || phone.length < 9) {
+            showError('phoneError', 'Please enter a valid phone number (9 digits).');
+            valid = false;
+        } else {
+            hideError('phoneError');
+        }
+
+        if (!valid) return;
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span><i class="fas fa-spinner fa-spin mr-2"></i>Publishing...</span>';
+
+        setTimeout(() => {
+            addListing({
+                photo: selectedPhotoData,
+                type: type.value,
+                location: location,
+                price: price,
+                phone: phone
+            });
+
+            closePostModal();
+            filterListings();
+            showToast('Listing published successfully!', 'success');
+
+            btn.disabled = false;
+            btn.innerHTML = '<span><i class="fas fa-paper-plane mr-2"></i>Publish Listing</span>';
+        }, 600);
+    }
+
+    function openMessageModal(id) {
+        const listings = getListings();
+        const house = listings.find(l => l.id === id);
+        if (!house) return;
+
+        currentMessageHouse = house;
+
+        document.getElementById('msgHouseImg').src = house.photo;
+        document.getElementById('msgHouseBadge').className = 'badge ' + getTypeBadgeClass(house.type);
+        document.getElementById('msgHouseBadge').textContent = getTypeLabel(house.type);
+        document.getElementById('msgHouseTitle').innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>' + house.location;
+        document.getElementById('msgHousePrice').textContent = formatPrice(house.price) + ' RWF' + (house.type === 'rent' ? '/mo' : '');
+        document.getElementById('directCallNumber').textContent = '+250 ' + house.phone;
+        document.getElementById('directCallLink').href = 'tel:+250' + house.phone.replace(/\s/g, '');
+
+        document.getElementById('senderName').value = '';
+        document.getElementById('senderPhone').value = '';
+        document.getElementById('senderMessage').value = '';
+        document.querySelectorAll('#messageModal [id$="Error"]').forEach(el => el.classList.add('hidden'));
+
+        const modal = document.getElementById('messageModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMessageModal() {
+        const modal = document.getElementById('messageModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        currentMessageHouse = null;
+    }
+
+    function handleMessageSubmit(e) {
+        e.preventDefault();
+        let valid = true;
+
+        const name = document.getElementById('senderName').value.trim();
+        const phone = document.getElementById('senderPhone').value.trim().replace(/\s/g, '');
+        const message = document.getElementById('senderMessage').value.trim();
+
+        if (!name) {
+            showError('senderNameError', 'Please enter your name.');
+            valid = false;
+        } else { hideError('senderNameError'); }
+
+        if (!phone || phone.length < 9) {
+            showError('senderPhoneError', 'Please enter a valid phone number.');
+            valid = false;
+        } else { hideError('senderPhoneError'); }
+
+        if (!message) {
+            showError('senderMessageError', 'Please write a message.');
+            valid = false;
+        } else { hideError('senderMessageError'); }
+
+        if (!valid) return;
+
+        if (!currentMessageHouse) return;
+
+        const subject = encodeURIComponent(`${SITE_NAME} Inquiry: ${getTypeLabel(currentMessageHouse.type)} in ${currentMessageHouse.location}`);
+        const body = encodeURIComponent(
+            `Hello,\n\n` +
+            `Someone is interested in your listing on ${SITE_NAME}:\n\n` +
+            `Listing: ${getTypeLabel(currentMessageHouse.type)}\n` +
+            `Location: ${currentMessageHouse.location}\n` +
+            `Price: ${formatPrice(currentMessageHouse.price)} RWF${currentMessageHouse.type === 'rent' ? '/mo' : ''}\n\n` +
+            `--- Message from interested person ---\n` +
+            `Name: ${name}\n` +
+            `Phone: +250 ${phone}\n\n` +
+            `Message:\n${message}\n\n` +
+            `---\n` +
+            `This message was sent via ${SITE_NAME}.`
+        );
+
+        window.location.href = `mailto:${EMAIL_TARGET}?subject=${subject}&body=${body}`;
+
+        closeMessageModal();
+        showToast('Your email client has been opened with the message. Please send it!', 'success');
+    }
+
+    function openDeleteModal(id) {
+        deleteTargetId = id;
+        const modal = document.getElementById('deleteModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        deleteTargetId = null;
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function confirmDelete() {
+        if (!deleteTargetId) return;
+        deleteListing(deleteTargetId);
+        closeDeleteModal();
+        filterListings();
+        showToast('Listing deleted.', 'info');
+    }
+
+    function showToast(message, type) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+
+        const colors = {
+            success: { bg: '#27AE60', icon: 'fa-check-circle' },
+            info: { bg: '#2980B9', icon: 'fa-info-circle' },
+            error: { bg: '#C0392B', icon: 'fa-exclamation-circle' }
+        };
+        const c = colors[type] || colors.info;
+
+        toast.className = 'toast flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-medium';
+        toast.style.background = c.bg;
+        toast.innerHTML = `<i class="fas ${c.icon}"></i>${message}`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 3200);
+    }
+
+    function toggleMobileMenu() {
+        mobileMenuOpen = !mobileMenuOpen;
+        const menu = document.getElementById('mobileMenu');
+        const btn = document.getElementById('mobileMenuBtn');
+        if (mobileMenuOpen) {
+            menu.style.opacity = '1';
+            menu.style.transform = 'translateY(0)';
+            menu.style.pointerEvents = 'auto';
+            btn.innerHTML = '<i class="fas fa-times text-lg"></i>';
+        } else {
+            closeMobileMenu();
+        }
+    }
+
+    function closeMobileMenu() {
+        mobileMenuOpen = false;
+        const menu = document.getElementById('mobileMenu');
+        const btn = document.getElementById('mobileMenuBtn');
+        menu.style.opacity = '0';
+        menu.style.transform = 'translateY(-10px)';
+        menu.style.pointerEvents = 'none';
+        btn.innerHTML = '<i class="fas fa-bars text-lg"></i>';
+    }
+
+    function handleNavScroll() {
+        const nav = document.getElementById('mainNav');
+        if (window.scrollY > 40) {
+            nav.classList.add('nav-scrolled');
+        } else {
+            nav.classList.remove('nav-scrolled');
+        }
+    }
+
+    let observerInstance;
+    function initScrollReveal() {
+        observerInstance = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => observerInstance.observe(el));
+    }
+
+    document.getElementById('postModal').addEventListener('click', function(e) {
+        if (e.target === this) closePostModal();
+    });
+    document.getElementById('messageModal').addEventListener('click', function(e) {
+        if (e.target === this) closeMessageModal();
+    });
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('deleteModal').style.display === 'flex') closeDeleteModal();
+            else if (document.getElementById('messageModal').style.display === 'flex') closeMessageModal();
+            else if (document.getElementById('postModal').style.display === 'flex') closePostModal();
+        }
+    });
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', handleNavScroll, { passive: true });
+    document.addEventListener('DOMContentLoaded', function() {
+        handleNavScroll();
+        initScrollReveal();
+        filterListings();
+    });
+
+    if (document.readyState !== 'loading') {
+        handleNavScroll();
+        filterListings();
+        setTimeout(initScrollReveal, 50);
+    }
+</script>
+</body>
+</html>
